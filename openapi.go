@@ -89,7 +89,7 @@ type PublishReleaseRequest struct {
 type Release struct {
 	AppID                      string            `json:"appId"`
 	ClusterName                string            `json:"clusterName"`
-	namespaceName              string            `json:"namespaceName"`
+	NamespaceName              string            `json:"namespaceName"`
 	Name                       string            `json:"name"`
 	Configurations             map[string]string `json:"configurations"`
 	Comment                    string            `json:"comment"`
