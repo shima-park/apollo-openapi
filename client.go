@@ -15,8 +15,12 @@ type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
+type LoggerFunc func(fotmat string, args ...interface{})
+
 type ClientOptions struct {
-	Doer Doer
+	Doer       Doer
+	Debug      bool
+	LoggerFunc LoggerFunc
 }
 
 type ClientOption func(*ClientOptions)
@@ -24,6 +28,18 @@ type ClientOption func(*ClientOptions)
 func WithDoer(d Doer) ClientOption {
 	return func(o *ClientOptions) {
 		o.Doer = d
+	}
+}
+
+func WithDebug(d bool) ClientOption {
+	return func(o *ClientOptions) {
+		o.Debug = d
+	}
+}
+
+func WithLoggerFunc(lf LoggerFunc) ClientOption {
+	return func(o *ClientOptions) {
+		o.LoggerFunc = lf
 	}
 }
 
@@ -41,6 +57,13 @@ func NewClient(portalAddress, token string, opts ...ClientOption) OpenAPI {
 
 	if options.Doer == nil {
 		options.Doer = &http.Client{}
+	}
+
+	if options.LoggerFunc == nil {
+		options.LoggerFunc = func(format string, args ...interface{}) {
+			format += "\n"
+			fmt.Printf(format, args...)
+		}
 	}
 
 	return &client{
@@ -61,32 +84,48 @@ func (c *client) newRequest(method, url string, body io.Reader) (*http.Request, 
 	return req, nil
 }
 
-func (c *client) do(method, url string, request, response interface{}) error {
-	fmt.Println(url)
+func (c *client) debug(format string, args ...interface{}) {
+	if c.options.Debug {
+		c.options.LoggerFunc(format, args...)
+	}
+}
 
-	var reqBody io.Reader
+func (c *client) do(method, url string, request, response interface{}) error {
+	var (
+		reqBodyReader io.Reader
+		reqBody       []byte
+		err           error
+		req           *http.Request
+		respBody      []byte
+		status        int
+	)
+	defer func(reqBody, respBody *[]byte) {
+		c.debug("Method: %s, URL: %s, \n Request body: %s,\n Response body: %s",
+			method, url, *reqBody, *respBody)
+	}(&reqBody, &respBody)
+
 	if request != nil {
-		b, err := json.Marshal(request)
+		reqBody, err = json.Marshal(request)
 		if err != nil {
 			return err
 		}
-		fmt.Println("========body", string(b))
-		reqBody = bytes.NewReader(b)
+
+		reqBodyReader = bytes.NewReader(reqBody)
 	}
 
-	req, err := c.newRequest(method, url, reqBody)
+	req, err = c.newRequest(method, url, reqBodyReader)
 	if err != nil {
 		return err
 	}
 
-	status, body, err := parseResponseBody(c.options.Doer, req)
+	status, respBody, err = parseResponseBody(c.options.Doer, req)
 	if err != nil {
 		return err
 	}
 
 	if status == http.StatusOK {
 		if response != nil {
-			return json.Unmarshal(body, response)
+			return json.Unmarshal(respBody, response)
 		}
 		return nil
 	}
@@ -135,10 +174,10 @@ func (c *client) GetNamespace(env, appID, clusterName, namespaceName string) (re
 	return
 }
 
-func (c *client) CreateNamespace(r CreateNamespaceRequest) (res *Namespace, err error) {
-	url := fmt.Sprintf("%s/openapi/v1/apps/%s/appnamespaces",
-		c.portalAddress, r.AppID)
-	res = &Namespace{}
+func (c *client) CreateNamespace(r CreateNamespaceRequest) (res *CreateNamespaceResponse, err error) {
+	url := fmt.Sprintf("%s/openapi/v1/apps/%s/appnamespaces?appendNamespacePrefix=%v",
+		c.portalAddress, r.AppID, r.AppendNamespacePrefix)
+	res = &CreateNamespaceResponse{}
 	err = c.do("POST", url, r, &res)
 	return
 }

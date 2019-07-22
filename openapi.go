@@ -14,7 +14,7 @@ type OpenAPI interface {
 	GetEnvClusters(appID string) ([]EnvWithClusters, error)
 	GetNamespaces(env, appID, clusterName string) ([]Namespace, error)
 	GetNamespace(env, appID, clusterName, namespaceName string) (*Namespace, error)
-	CreateNamespace(r CreateNamespaceRequest) (*Namespace, error)
+	CreateNamespace(r CreateNamespaceRequest) (*CreateNamespaceResponse, error)
 	GetNamespaceLock(env, appID, clusterName, namespaceName string) (*NamespaceLock, error)
 	AddItem(env, appID, clusterName, namespaceName string, r AddItemRequest) (*Item, error)
 	UpdateItem(env, appID, clusterName, namespaceName string, r UpdateItemRequest) error
@@ -40,7 +40,7 @@ type Item struct {
 type Namespace struct {
 	AppID                      string `json:"appId"`
 	ClusterName                string `json:"clusterName"`
-	namespaceName              string `json:"namespaceName"`
+	NamespaceName              string `json:"namespaceName"`
 	Comment                    string `json:"comment"`
 	Format                     string `json:"format"`
 	IsPublic                   bool   `json:"isPublic"`
@@ -51,13 +51,28 @@ type Namespace struct {
 	DataChangeLastModifiedTime string `json:"dataChangeLastModifiedTime"`
 }
 
+//{"name":"TEST1.sms.yml","appId":"conn.mysql","format":"yml","isPublic":true,"appendNamespacePrefix":true,"comment":"migrate namespace from consul","dataChangeCreatedBy":"apollo","dataChangeLastModifiedBy":"apollo","dataChangeCreatedTime":"2019-07-19T19:52:03.923+0800","dataChangeLastModifiedTime":"2019-07-19T19:52:03.923+0800"}
+type CreateNamespaceResponse struct {
+	Name                       string `json:"name"`
+	AppID                      string `json:"appId"`
+	Format                     string `json:"format"`
+	IsPublic                   bool   `json:"isPublic"`
+	AppendNamespacePrefix      bool   `json:"appendNamespacePrefix"`
+	Comment                    string `json:"comment"`
+	DataChangeCreatedBy        string `json:"dataChangeCreatedBy"`
+	DataChangeLastModifiedBy   string `json:"dataChangeLastModifiedBy"`
+	DataChangeCreatedTime      string `json:"dataChangeCreatedTime"`
+	DataChangeLastModifiedTime string `json:"dataChangeLastModifiedTime"`
+}
+
 type CreateNamespaceRequest struct {
-	Name                string `json:"name"`                // Namespace的名字
-	AppID               string `json:"appId"`               // Namespace所属的AppId
-	Format              Format `json:"format"`              // Namespace的格式，只能是以下类型： properties、xml、json、yml、yaml
-	IsPublic            bool   `json:"isPublic"`            // 是否是公共文件
-	DataChangeCreatedBy string `json:"dataChangeCreatedBy"` // namespace的创建人，格式为域账号，也就是sso系统的User ID
-	Comment             string `json:"comment"`             // Namespace说明
+	Name                  string `json:"name"`                // Namespace的名字
+	AppID                 string `json:"appId"`               // Namespace所属的AppId
+	Format                Format `json:"format"`              // Namespace的格式，只能是以下类型： properties、xml、json、yml、yaml
+	IsPublic              bool   `json:"isPublic"`            // 是否是公共文件
+	DataChangeCreatedBy   string `json:"dataChangeCreatedBy"` // namespace的创建人，格式为域账号，也就是sso系统的User ID
+	Comment               string `json:"comment"`             // Namespace说明
+	AppendNamespacePrefix bool   `json:"appendNamespacePrefix"`
 }
 
 type NamespaceLock struct {

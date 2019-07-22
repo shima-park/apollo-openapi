@@ -8,7 +8,7 @@ import (
 var (
 	portalAddress = "localhost:8070"
 	token         = "5573adf2107c1e34d9b726e1570f64a62c9f1ca5"
-	c             = NewClient(portalAddress, token)
+	c             = NewClient(portalAddress, token, WithDebug(true))
 )
 
 func TestClientGet(t *testing.T) {
