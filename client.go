@@ -208,6 +208,14 @@ func (c *client) UpdateItem(env, appID, clusterName, namespaceName string, r Upd
 	return
 }
 
+func (c *client) CreateOrUpdateItem(env, appID, clusterName, namespaceName string, r UpdateItemRequest) (err error) {
+	namespaceName = normalizeNamespace(namespaceName)
+	url := fmt.Sprintf("%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s/items/%s?createIfNotExists=true",
+		c.portalAddress, env, appID, clusterName, namespaceName, r.Key)
+	err = c.do("PUT", url, r, nil)
+	return
+}
+
 func (c *client) DeleteItem(env, appID, clusterName, namespaceName, key, operator string) error {
 	namespaceName = normalizeNamespace(namespaceName)
 	url := fmt.Sprintf("%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s/items/%s?operator=%s",
