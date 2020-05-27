@@ -105,6 +105,27 @@ func TestUpdateItem(t *testing.T) {
 	}
 }
 
+func TestCreateOrUpdateItem(t *testing.T) {
+	var (
+		env         = "DEV"
+		appID       = "SampleApp"
+		clusterName = "default"
+		namespace   = "application"
+		operator    = "apollo"
+	)
+
+	err := c.CreateOrUpdateItem(env, appID, clusterName, namespace, UpdateItemRequest{
+		Key:                      "name",
+		Value:                    "bar",
+		DataChangeLastModifiedBy: operator,
+		Comment:                  "update item",
+		DataChangeCreatedBy: 	  operator,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestDeleteItem(t *testing.T) {
 	var (
 		env         = "DEV"
