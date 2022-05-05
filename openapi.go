@@ -10,6 +10,10 @@ const (
 
 type Format string
 
+func (f Format) String() string {
+	return string(f)
+}
+
 type OpenAPI interface {
 	GetEnvClusters(appID string) ([]EnvWithClusters, error)
 	GetNamespaces(env, appID, clusterName string) ([]Namespace, error)
