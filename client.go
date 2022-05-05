@@ -265,5 +265,5 @@ func normalizeURL(url string) string {
 }
 
 func normalizeNamespace(ns string) string {
-	return strings.TrimSuffix(ns, "."+FormatProperties)
+	return strings.TrimSuffix(ns, "."+string(FormatProperties))
 }
