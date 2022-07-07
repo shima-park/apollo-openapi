@@ -15,6 +15,7 @@ func (f Format) String() string {
 }
 
 type OpenAPI interface {
+	GetApps() ([]Application, error)
 	GetEnvClusters(appID string) ([]EnvWithClusters, error)
 	GetNamespaces(env, appID, clusterName string) ([]Namespace, error)
 	GetNamespace(env, appID, clusterName, namespaceName string) (*Namespace, error)
@@ -26,6 +27,19 @@ type OpenAPI interface {
 	DeleteItem(env, appID, clusterName, namespaceName, key, operator string) error
 	PublishRelease(env, appID, clusterName, namespaceName string, r PublishReleaseRequest) (*Release, error)
 	GetRelease(env, appID, clusterName, namespaceName string) (*Release, error)
+}
+
+type Application struct {
+	Name                       string `json:"name"`
+	AppID                      string `json:"appId"`
+	OrgID                      string `json:"orgId"`
+	OrgName                    string `json:"orgName"`
+	OwnerName                  string `json:"ownerName"`
+	OwnerEmail                 string `json:"ownerEmail"`
+	DataChangeCreatedBy        string `json:"dataChangeCreatedBy"`
+	DataChangeLastModifiedBy   string `json:"dataChangeLastModifiedBy"`
+	DataChangeCreatedTime      string `json:"dataChangeCreatedTime"`
+	DataChangeLastModifiedTime string `json:"dataChangeLastModifiedTime"`
 }
 
 type EnvWithClusters struct {

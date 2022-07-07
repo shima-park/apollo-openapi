@@ -152,6 +152,12 @@ func getErrorMessage(status int) string {
 	}
 }
 
+func (c *client) GetApps() (res []Application, err error) {
+	url := fmt.Sprintf("%s/openapi/v1/apps", c.portalAddress)
+	err = c.do("GET", url, nil, &res)
+	return
+}
+
 func (c *client) GetEnvClusters(appID string) (res []EnvWithClusters, err error) {
 	url := fmt.Sprintf("%s/openapi/v1/apps/%s/envclusters", c.portalAddress, appID)
 	err = c.do("GET", url, nil, &res)
