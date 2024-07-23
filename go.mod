@@ -1,3 +1,3 @@
-module github.com/shima-park/apollo-openapi
+module github.com/Xuwudong/apollo-openapi
 
 go 1.12

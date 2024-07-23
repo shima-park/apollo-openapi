@@ -47,9 +47,11 @@ type client struct {
 	portalAddress string
 	token         string
 	options       ClientOptions
+	host          string
+	header        map[string]string
 }
 
-func NewClient(portalAddress, token string, opts ...ClientOption) OpenAPI {
+func NewClient(portalAddress, token string, host string, header map[string]string, opts ...ClientOption) OpenAPI {
 	var options ClientOptions
 	for _, opt := range opts {
 		opt(&options)
@@ -69,7 +71,9 @@ func NewClient(portalAddress, token string, opts ...ClientOption) OpenAPI {
 	return &client{
 		portalAddress: normalizeURL(portalAddress),
 		token:         token,
+		host:          host,
 		options:       options,
+		header:        header,
 	}
 }
 
@@ -81,6 +85,12 @@ func (c *client) newRequest(method, url string, body io.Reader) (*http.Request, 
 
 	req.Header.Set("Authorization", c.token)
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	for k, v := range c.header {
+		req.Header.Set(k, v)
+	}
+	if c.host != "" {
+		req.Host = c.host
+	}
 	return req, nil
 }
 
@@ -100,8 +110,8 @@ func (c *client) do(method, url string, request, response interface{}) error {
 		status        int
 	)
 	defer func(reqBody, respBody *[]byte) {
-		c.debug("Method: %s, URL: %s, \n Request body: %s,\n Response body: %s",
-			method, url, *reqBody, *respBody)
+		c.debug("Method: %s, URL: %s, header:%v \n Request body: %s,\n Response body: %s",
+			method, url, req.Header, *reqBody, *respBody)
 	}(&reqBody, &respBody)
 
 	if request != nil {
